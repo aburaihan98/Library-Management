@@ -94,7 +94,35 @@ bookRoutes.get(
 
       res.status(200).json({
         success: true,
-        message: "Books retrieved successfully",
+        message: "One Book retrieved successfully",
+        data: books,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: "Something went wrong",
+        error: error.message,
+      });
+    }
+  }
+);
+// Update Book
+bookRoutes.put(
+  "/:bookId",
+  async (req: Request, res: Response): Promise<any> => {
+    try {
+      const id = req.params.bookId;
+      const updatedDoc = req.body;
+
+      const books = await Book.findByIdAndUpdate(
+        { _id: new ObjectId(id) },
+        updatedDoc,
+        { new: true }
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Book updated successfully",
         data: books,
       });
     } catch (error: any) {
