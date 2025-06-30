@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import { Book } from "../models/book.model";
+import { ObjectId } from "mongodb";
 
 export const bookRoutes = express.Router();
 
@@ -82,3 +83,26 @@ bookRoutes.get("/", async (req: Request, res: Response): Promise<any> => {
     });
   }
 });
+//Get Book by ID
+bookRoutes.get(
+  "/:bookId",
+  async (req: Request, res: Response): Promise<any> => {
+    try {
+      const id = req.params.bookId;
+
+      const books = await Book.find({ _id: new ObjectId(id) });
+
+      res.status(200).json({
+        success: true,
+        message: "Books retrieved successfully",
+        data: books,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: "Something went wrong",
+        error: error.message,
+      });
+    }
+  }
+);
