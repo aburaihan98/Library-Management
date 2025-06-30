@@ -41,8 +41,6 @@ Request:
 }
 ```
 
-````
-
 Response:
 
 ```json
@@ -75,4 +73,3 @@ Response:
 
 1. Clone repo & install dependencies
 2. Run server: `npm run dev`
-````
