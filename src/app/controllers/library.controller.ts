@@ -94,7 +94,7 @@ bookRoutes.get(
 
       res.status(200).json({
         success: true,
-        message: "One Book retrieved successfully",
+        message: "Book retrieved successfully",
         data: books,
       });
     } catch (error: any) {
@@ -124,6 +124,32 @@ bookRoutes.put(
         success: true,
         message: "Book updated successfully",
         data: books,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: "Something went wrong",
+        error: error.message,
+      });
+    }
+  }
+);
+// Delete Book
+bookRoutes.delete(
+  "/:bookId",
+  async (req: Request, res: Response): Promise<any> => {
+    try {
+      const id = req.params.bookId;
+
+      const books = await Book.findByIdAndDelete(
+        { _id: new ObjectId(id) },
+        { new: true }
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Book deleted successfully",
+        data: null,
       });
     } catch (error: any) {
       res.status(500).json({
