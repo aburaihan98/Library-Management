@@ -1,13 +1,40 @@
 import express, { Request, Response } from "express";
 import { Book } from "../models/book.model";
 import { ObjectId } from "mongodb";
+import { z } from "zod";
 
 export const bookRoutes = express.Router();
+
+// zod validation
+const createBookSchema = z.object({
+  title: z.string({ required_error: "Title is required" }),
+  author: z.string({ required_error: "Author is required" }),
+  genre: z.enum(
+    ["FICTION", "NON_FICTION", "SCIENCE", "HISTORY", "BIOGRAPHY", "FANTASY"],
+    { required_error: "Genre is required" }
+  ),
+  isbn: z.string({ required_error: "ISBN is required" }),
+  description: z.string().optional(),
+  copies: z
+    .number({ required_error: "Copies is required" })
+    .min(0, { message: "Copies must be a non-negative number" }),
+  available: z.boolean().optional(),
+});
 
 // Create Book
 bookRoutes.post("/", async (req: Request, res: Response): Promise<any> => {
   try {
-    const newBook = await Book.create(req.body);
+    const zodBody = createBookSchema.safeParse(req.body);
+
+    if (!zodBody.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        error: zodBody.error.format(),
+      });
+    }
+
+    const newBook = await Book.create(zodBody.data);
     res.status(201).json({
       success: true,
       message: "Book created successfully",
@@ -61,7 +88,7 @@ bookRoutes.get("/", async (req: Request, res: Response): Promise<any> => {
       limit = "10",
     } = req.query;
 
-    let query: Record<string, any> = {};
+    const query: Record<string, any> = {};
     if (filter) {
       query.genre = filter;
     }

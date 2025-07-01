@@ -8,7 +8,6 @@ export const borrowRoutes = express.Router();
 borrowRoutes.post("/", async (req: Request, res: Response): Promise<any> => {
   try {
     const { book, quantity, dueDate } = req.body;
-
     const foundBook = await Book.findById(book);
     if (!foundBook) {
       return res.status(404).json({
@@ -55,6 +54,8 @@ borrowRoutes.post("/", async (req: Request, res: Response): Promise<any> => {
       foundBook.available = false;
     }
     await foundBook.save();
+
+    await foundBook.decreaseCopies(quantity);
 
     // Borrow record save
     const borrowRecord = await Borrow.create({ book, quantity, dueDate });

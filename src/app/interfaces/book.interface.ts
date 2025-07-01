@@ -13,3 +13,7 @@ export interface IBookInterface {
   copies: number;
   available?: boolean;
 }
+
+export interface BookInstanceMethods {
+  decreaseCopies: (quantity: number) => Promise<void>;
+}

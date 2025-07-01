@@ -1,5 +1,8 @@
-import mongoose, { Schema } from "mongoose";
-import { IBookInterface } from "../interfaces/book.interface";
+import mongoose, { Model, Schema } from "mongoose";
+import {
+  BookInstanceMethods,
+  IBookInterface,
+} from "../interfaces/book.interface";
 
 const bookSchema = new Schema<IBookInterface>(
   {
@@ -48,4 +51,15 @@ const bookSchema = new Schema<IBookInterface>(
   }
 );
 
-export const Book = mongoose.model("Book", bookSchema);
+bookSchema.methods.decreaseCopies = async function (quantity: number) {
+  this.copies -= quantity;
+  if (this.copies <= 0) {
+    this.available = false;
+  }
+  await this.save();
+};
+
+export const Book = mongoose.model<
+  IBookInterface,
+  Model<IBookInterface, Record<string, unknown>, BookInstanceMethods>
+>("Book", bookSchema);
