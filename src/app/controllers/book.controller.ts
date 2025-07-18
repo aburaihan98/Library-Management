@@ -22,64 +22,67 @@ const createBookSchema = z.object({
 });
 
 // Create Book
-bookRoutes.post("/", async (req: Request, res: Response): Promise<any> => {
-  try {
-    const zodBody = createBookSchema.safeParse(req.body);
+bookRoutes.post(
+  "/create-book",
+  async (req: Request, res: Response): Promise<any> => {
+    try {
+      const zodBody = createBookSchema.safeParse(req.body);
 
-    if (!zodBody.success) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        error: zodBody.error.format(),
+      if (!zodBody.success) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          error: zodBody.error.format(),
+        });
+      }
+
+      const newBook = await Book.create(zodBody.data);
+      res.status(201).json({
+        success: true,
+        message: "Book created successfully",
+        data: newBook,
       });
-    }
-
-    const newBook = await Book.create(zodBody.data);
-    res.status(201).json({
-      success: true,
-      message: "Book created successfully",
-      data: newBook,
-    });
-  } catch (error: any) {
-    // Duplicate key error
-    if (error.code === 11000 && error.keyPattern?.isbn) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        error: {
-          name: "ValidationError",
-          errors: {
-            isbn: {
-              message: "Book with this ISBN already exists",
-              name: error.name,
-              kind: "duplicate",
-              path: "isbn",
-              value: error.keyValue?.isbn,
+    } catch (error: any) {
+      // Duplicate key error
+      if (error.code === 11000 && error.keyPattern?.isbn) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          error: {
+            name: "ValidationError",
+            errors: {
+              isbn: {
+                message: "Book with this ISBN already exists",
+                name: error.name,
+                kind: "duplicate",
+                path: "isbn",
+                value: error.keyValue?.isbn,
+              },
             },
           },
-        },
-      });
-    }
+        });
+      }
 
-    // Mongoose ValidationError (e.g., invalid copies)
-    if (error.name === "ValidationError") {
-      return res.status(400).json({
+      // Mongoose ValidationError (e.g., invalid copies)
+      if (error.name === "ValidationError") {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          error: error,
+        });
+      }
+
+      // Any other errors
+      res.status(500).json({
         success: false,
-        message: "Validation failed",
-        error: error,
+        message: "Something went wrong",
+        error: error.message,
       });
     }
-
-    // Any other errors
-    res.status(500).json({
-      success: false,
-      message: "Something went wrong",
-      error: error.message,
-    });
   }
-});
+);
 // Get All Books
-bookRoutes.get("/", async (req: Request, res: Response): Promise<any> => {
+bookRoutes.get("/books", async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       filter,
@@ -112,10 +115,10 @@ bookRoutes.get("/", async (req: Request, res: Response): Promise<any> => {
 });
 //Get Book by ID
 bookRoutes.get(
-  "/:bookId",
+  "/books/:id",
   async (req: Request, res: Response): Promise<any> => {
     try {
-      const id = req.params.bookId;
+      const id = req.params.id;
 
       const books = await Book.find({ _id: new ObjectId(id) });
 
@@ -135,11 +138,13 @@ bookRoutes.get(
 );
 // Update Book
 bookRoutes.put(
-  "/:bookId",
+  "/edit-book/:id",
   async (req: Request, res: Response): Promise<any> => {
     try {
-      const id = req.params.bookId;
+      const id = req.params.id;
       const updatedDoc = req.body;
+
+      console.log(id, updatedDoc);
 
       const books = await Book.findByIdAndUpdate(
         { _id: new ObjectId(id) },

@@ -9,7 +9,7 @@ async function main() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await mongoose.connect(
-      "mongodb+srv://aburaihanrahmani:gDng3596DSYKVjpz@raihan.0p9bes0.mongodb.net/library-management?retryWrites=true&w=majority&appName=Raihan"
+      "mongodb+srv://aburaihanrahmani:gDng3596DSYKVjpz@raihan.0p9bes0.mongodb.net/Minimal-Library-Management-System?retryWrites=true&w=majority&appName=Raihan"
     );
 
     server = app.listen(PORT, () => {
